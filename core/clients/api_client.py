@@ -1,12 +1,10 @@
-from http.client import responses
-
 import jsonschema
 import requests
 import os
 from dotenv import load_dotenv
 from core.settings.environments import Environment
 from core.clients.endpoints import Endpoints
-from core.settings.config import Users, Timeouts, BookingID
+from core.settings.config import Users, Timeouts
 from tests.schemas.booking_schema import BOOKING_SCHEMA
 import allure
 
@@ -71,9 +69,12 @@ class APIClient:
         with allure.step("Updating header with authorization"):
             self.session.headers.update({"Authorization:" f"Bearer {token}"})
 
-    def get_booking_by_id(self):
+    def create_and_get_booking_by_id(self, create_booking):
+        with allure.step("Creating booking id"):
+            booking_id = create_booking["bookingid"]
+
         with allure.step("Get booking"):
-            url = f"{self.base.url}{Endpoints.BOOKING_ENDPOINT}/{BookingID.ID}"
+            url = f"{self.base.url}{Endpoints.BOOKING_ENDPOINT}/{booking_id}"
             response = self.session.get(url)
             response.raise_for_status()
             data = response.json()
