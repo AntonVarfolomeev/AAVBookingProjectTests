@@ -69,9 +69,17 @@ class APIClient:
         with allure.step("Updating header with authorization"):
             self.session.headers.update({"Authorization:" f"Bearer {token}"})
 
-    def create_and_get_booking_by_id(self, create_booking):
-        with allure.step("Creating booking id"):
-            booking_id = create_booking["bookingid"]
+    def create_and_get_booking_by_id(self):
+        with allure.step("Adding data for creating booking id"):
+            payload = {
+                "firstname": "Jim", "lastname": "Brown", "totalprice": 111, "depositpaid": True, "additionalneeds": "Breakfast", "bookingdates" : {
+        "checkin" : "2018-01-01", "checkout" : "2019-01-01"}
+            }
+            with allure.step('Creating booking id'):
+                url = f"{self.base.url}{Endpoints.BOOKING_ENDPOINT}"
+                response = self.session.post(url, json=payload)
+                assert response.status_code == 200, f"Expected status 200 but got {response.status_code}"
+                booking_id = response.json()["bookingid"]
 
         with allure.step("Get booking"):
             url = f"{self.base.url}{Endpoints.BOOKING_ENDPOINT}/{booking_id}"
