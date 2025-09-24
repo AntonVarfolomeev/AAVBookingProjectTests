@@ -69,20 +69,30 @@ class APIClient:
         with allure.step("Updating header with authorization"):
             self.session.headers.update({"Authorization:" f"Bearer {token}"})
 
-    def create_booking_id(self):
-        with allure.step("Adding data for creating booking id"):
-            payload = {
-                "firstname": "Jim", "lastname": "Brown", "totalprice": 111, "depositpaid": True, "additionalneeds": "Breakfast", "bookingdates" : {
-        "checkin" : "2018-01-01", "checkout" : "2019-01-01"}
-            }
-            with allure.step('Creating booking id'):
-                url = f"{self.base.url}{Endpoints.BOOKING_ENDPOINT}"
-                response = self.session.post(url, json=payload)
-                assert response.status_code == 200, f"Expected status 200 but got {response.status_code}"
-                booking_id = response.json()["bookingid"]
-                return booking_id
+    def create_booking(self, booking_data):
 
-    def get_booking_by_id(self, booking_id):
+        with allure.step('Creating booking'):
+            url = f"{self.base.url}{Endpoints.BOOKING_ENDPOINT}"
+            response = self.session.post(url, json=booking_data)
+            assert response.status_code == 200, f"Expected status 200 but got {response.status_code}"
+            booking_id = response.json()["bookingid"]
+            return booking_id
+
+    def test_add_new_booking(self):
+        booking_data = {
+            "firstname": "Jim", "lastname": "Brown", "totalprice": 111, "depositpaid": True,
+            "additionalneeds": "Breakfast", "bookingdates": {
+                "checkin": "2018-01-01", "checkout": "2019-01-01"}
+        }
+
+        booking_id = self.create_booking(booking_data)
+
+        with allure.step('Asserting status code and validating JSON'):
+            status_code, data = self.get_booking(booking_id)
+            assert status_code == 200, f"Expected status 200 but got {status_code}"
+            jsonschema.validate(data, BOOKING_SCHEMA)
+
+    def get_booking(self, booking_id):
         with allure.step("Get booking"):
             url = f"{self.base.url}{Endpoints.BOOKING_ENDPOINT}/{booking_id}"
             response = self.session.get(url)
