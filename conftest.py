@@ -2,6 +2,8 @@ from core.clients.api_client import APIClient
 from datetime import datetime, timedelta
 from faker import Faker
 import pytest
+import requests
+from core.clients.endpoints import Endpoints
 
 
 @pytest.fixture(scope="session")
