@@ -4,20 +4,20 @@ import requests
 
 from conftest import generate_random_booking_data
 from core.clients.api_client import APIClient
-from tests.schemas.booking_schema import BOOKING_SCHEMA
+from tests.schemas.booking_schema import CREATE_BOOKING_SCHEMA
 import jsonschema
 
 
 @allure.feature('Test create booking')
 @allure.story('Test positive script with valid info')
-def test_create_booking_success(generate_random_booking_data):
+def test_create_booking_success(generate_random_booking_data, api_client):
     with allure.step("Preparing data for creating booking"):
         payload = generate_random_booking_data
-        client = APIClient()
+        client = api_client
         response = client.create_booking(payload)
 
     with allure.step("Validating JSON schema"):
-        jsonschema.validate(response, BOOKING_SCHEMA)
+        jsonschema.validate(response, CREATE_BOOKING_SCHEMA)
 
     with allure.step("Validating response data"):
         assert 'bookingid' in response, "Booking ID isn't equal to expected"
