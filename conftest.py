@@ -44,3 +44,42 @@ def generate_random_booking_data(booking_dates):
     }
 
     return data
+
+@pytest.fixture()
+def generate_wrong_booking_data(booking_dates):
+    faker = Faker()
+    firstname = faker.first_name()
+    lastname = faker.last_name()
+    totalprice = faker.boolean()
+    depositpaid = faker.boolean()
+    additionalneeds = faker.sentence()
+
+    data = {
+        "firstname": firstname,
+        "lastname": lastname,
+        "totalprice": totalprice,
+        "depositpaid": depositpaid,
+        "bookingdates": booking_dates,
+        "additionalneeds": additionalneeds
+    }
+
+    return data
+
+
+@pytest.fixture()
+def generate_request_body_without_required_field(booking_dates):
+    faker = Faker()
+    firstname = faker.first_name()
+    totalprice = faker.random_number(digits=3)
+    depositpaid = faker.boolean()
+    additionalneeds = faker.sentence()
+
+    data = {
+        "firstname": firstname,
+        "totalprice": totalprice,
+        "depositpaid": depositpaid,
+        "bookingdates": booking_dates,
+        "additionalneeds": additionalneeds
+    }
+
+    return data
