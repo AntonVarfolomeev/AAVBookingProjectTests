@@ -26,3 +26,13 @@ BOOKING_SCHEMA = {
     ],
     "additionalProperties": False
 }
+
+CREATE_BOOKING_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "bookingid": {"type": "integer"},
+        "booking": BOOKING_SCHEMA
+    },
+    "required": ["bookingid", "booking"],
+    "additionalProperties": False
+}
