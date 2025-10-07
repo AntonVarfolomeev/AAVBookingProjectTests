@@ -51,7 +51,7 @@ def generate_wrong_booking_data(booking_dates):
     firstname = faker.first_name()
     lastname = faker.last_name()
     totalprice = faker.boolean()
-    depositpaid = faker.boolean()
+    depositpaid = 123
     additionalneeds = faker.sentence()
 
     data = {
