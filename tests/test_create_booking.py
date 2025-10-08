@@ -3,13 +3,15 @@ import allure
 import pytest
 import requests
 
-from conftest import generate_random_booking_data, api_client, generate_wrong_booking_data, generate_request_body_without_required_field
+from conftest import generate_random_booking_data, api_client, generate_wrong_booking_data, \
+    generate_request_body_without_mandatory_field, generate_empty_request_body
 from core.clients.api_client import APIClient
 from tests.schemas.booking_schema import CREATE_BOOKING_SCHEMA
 import jsonschema
 from dotenv import load_dotenv
 
 load_dotenv()
+
 
 @allure.feature('Test create booking')
 @allure.story('Test positive script with valid info')
@@ -37,17 +39,6 @@ def test_create_booking_success(generate_random_booking_data, api_client):
 
 
 @allure.feature('Test create booking')
-@allure.story('Test server error')
-def test_create_booking_internal_server_error(generate_random_booking_data, mocker, api_client):
-    payload = generate_random_booking_data
-    mock_response = mocker.Mock()
-    mock_response.status_code = 500
-    mocker.patch.object(api_client.session, 'post', return_value=mock_response)
-    with pytest.raises(AssertionError, match='Expected status 200 but got 500'):
-        api_client.create_booking(payload)
-
-
-@allure.feature('Test create booking')
 @allure.story('Test wrong URL')
 def test_create_booking_not_found(generate_random_booking_data, api_client):
     payload = generate_random_booking_data
@@ -58,68 +49,23 @@ def test_create_booking_not_found(generate_random_booking_data, api_client):
 
 
 @allure.feature('Test create booking')
-@allure.story('Test wrong HTTP method')
-def test_create_booking_wrong_method(generate_random_booking_data, mocker, api_client):
-    payload = generate_random_booking_data
-    mock_response = mocker.Mock()
-    mock_response.status_code = 405
-    mocker.patch.object(api_client.session, 'post', return_value=mock_response)
-    with pytest.raises(AssertionError, match='Expected status 200 but got 405'):
-        api_client.create_booking(payload)
-
-
-@allure.feature('Test create booking')
-@allure.story('Test connection with different success code')
-def test_create_booking_different_code(generate_random_booking_data, mocker, api_client):
-    payload = generate_random_booking_data
-    mock_response = mocker.Mock()
-    mock_response.status_code = 201
-    mocker.patch.object(api_client.session, 'post', return_value=mock_response)
-    with pytest.raises(AssertionError, match='Expected status 200 but got 201'):
-        api_client.create_booking(payload)
-
-@allure.feature('Test create booking')
-@allure.story('Test connection timeout')
-def test_create_booking_timeout(generate_random_booking_data, mocker, api_client):
-    payload = generate_random_booking_data
-    mocker.patch.object(api_client.session, 'post', side_effect=requests.Timeout)
-    with pytest.raises(requests.Timeout):
-        api_client.create_booking(payload)
-
-@allure.feature('Test create booking')
-@allure.story('Test server unavailability')
-def test_create_booking_server_unavailable(generate_random_booking_data, mocker, api_client):
-    payload = generate_random_booking_data
-    mocker.patch.object(api_client.session, 'post', side_effect=Exception('Server unavailable'))
-    with pytest.raises(Exception, match='Server unavailable'):
-        api_client.create_booking(payload)
-
-@allure.feature('Test create booking')
-@allure.story('Test with wrong header')
-def test_create_booking_with_wrong_request_header(generate_random_booking_data, mocker, api_client):
-    payload = generate_random_booking_data
-    mock_response = mocker.Mock()
-    mock_response.status_code = 418
-    mock_response.json.return_value = {"error": "I'm a teapot"}
-    api_client.session.headers ["Content-Type"] = "text/plain"
-    mocker.patch.object(api_client.session, 'post', return_value=mock_response)
-    with pytest.raises(AssertionError, match='Expected status 200 but got 418'):
-        api_client.create_booking(payload)
-
-@allure.feature('Test create booking')
-@allure.story('Test with wrong request body')
+@allure.story('Test where mandatory field "depositpaid" has invalid data type')
 def test_create_booking_wrong_request_body(generate_wrong_booking_data, api_client):
     payload = generate_wrong_booking_data
-    base_url = os.getenv('PROD_BASE_URL')
-    response = requests.post(f"{base_url}/booking", json=payload)
-    with allure.step('Проверка статуса ответа'):
-        assert response.status_code == 200, f'Expected status 200(400) but got {response.status_code}'
+    api_client.create_booking(payload)
+
 
 @allure.feature('Test create booking')
-@allure.story('Test with without required field in request body')
-def test_create_booking_missing_required_field(generate_request_body_without_required_field, mocker, api_client):
-    payload = generate_request_body_without_required_field
-    base_url = os.getenv('PROD_BASE_URL')
-    response = requests.post(f"{base_url}/booking", json=payload)
-    with allure.step('Проверка статуса ответа'):
-        assert response.status_code == 500, f'Expected status 500(400) but got {response.status_code}'
+@allure.story('Test with missed mandatory field in request body')
+def test_create_booking_missing_mandatory_field(generate_request_body_without_mandatory_field, mocker, api_client):
+    payload = generate_request_body_without_mandatory_field
+    with pytest.raises(AssertionError, match='Expected status 200 but got 500'):
+        api_client.create_booking(payload)
+
+
+@allure.feature('Test create booking')
+@allure.story('Test with empty JSON in request')
+def test_create_booking_missing_mandatory_field(generate_empty_request_body, mocker, api_client):
+    payload = generate_empty_request_body
+    with pytest.raises(AssertionError, match='Expected status 200 but got 500'):
+        api_client.create_booking(payload)

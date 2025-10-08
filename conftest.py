@@ -51,7 +51,7 @@ def generate_wrong_booking_data(booking_dates):
     firstname = faker.first_name()
     lastname = faker.last_name()
     totalprice = faker.boolean()
-    depositpaid = 123
+    depositpaid = "not_boolean"
     additionalneeds = faker.sentence()
 
     data = {
@@ -67,7 +67,7 @@ def generate_wrong_booking_data(booking_dates):
 
 
 @pytest.fixture()
-def generate_request_body_without_required_field(booking_dates):
+def generate_request_body_without_mandatory_field(booking_dates):
     faker = Faker()
     firstname = faker.first_name()
     totalprice = faker.random_number(digits=3)
@@ -81,5 +81,12 @@ def generate_request_body_without_required_field(booking_dates):
         "bookingdates": booking_dates,
         "additionalneeds": additionalneeds
     }
+
+    return data
+
+@pytest.fixture()
+def generate_empty_request_body():
+
+    data = {}
 
     return data
