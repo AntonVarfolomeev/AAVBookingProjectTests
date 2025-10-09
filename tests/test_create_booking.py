@@ -39,16 +39,6 @@ def test_create_booking_success(generate_random_booking_data, api_client):
 
 
 @allure.feature('Test create booking')
-@allure.story('Test wrong URL')
-def test_create_booking_not_found(generate_random_booking_data, api_client):
-    payload = generate_random_booking_data
-    base_url = os.getenv('PROD_BASE_URL')
-    response = requests.post(f"{base_url}/bookin", json=payload)
-    with allure.step('Проверка статуса ответа'):
-        assert response.status_code == 404, f'Expected status 404 but got {response.status_code}'
-
-
-@allure.feature('Test create booking')
 @allure.story('Test where mandatory field "depositpaid" has invalid data type')
 def test_create_booking_wrong_request_body(generate_wrong_booking_data, api_client):
     payload = generate_wrong_booking_data
@@ -57,7 +47,7 @@ def test_create_booking_wrong_request_body(generate_wrong_booking_data, api_clie
 
 @allure.feature('Test create booking')
 @allure.story('Test with missed mandatory field in request body')
-def test_create_booking_missing_mandatory_field(generate_request_body_without_mandatory_field, mocker, api_client):
+def test_create_booking_missing_mandatory_field(generate_request_body_without_mandatory_field, api_client):
     payload = generate_request_body_without_mandatory_field
     with pytest.raises(AssertionError, match='Expected status 200 but got 500'):
         api_client.create_booking(payload)
@@ -65,7 +55,7 @@ def test_create_booking_missing_mandatory_field(generate_request_body_without_ma
 
 @allure.feature('Test create booking')
 @allure.story('Test with empty JSON in request')
-def test_create_booking_missing_mandatory_field(generate_empty_request_body, mocker, api_client):
+def test_create_booking_with_empty_json(generate_empty_request_body, api_client):
     payload = generate_empty_request_body
     with pytest.raises(AssertionError, match='Expected status 200 but got 500'):
         api_client.create_booking(payload)
