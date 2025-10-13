@@ -2,6 +2,8 @@ import os
 import allure
 import pytest
 import requests
+from pydantic import ValidationError
+from core.models.booking import BookingResponse
 
 from conftest import generate_random_booking_data, api_client, generate_wrong_booking_data, \
     generate_request_body_without_mandatory_field, generate_empty_request_body
@@ -36,6 +38,35 @@ def test_create_booking_success(generate_random_booking_data, api_client):
             'checkout'], "Booking checkout isn't equal to expected"
         assert payload['additionalneeds'] == response['booking'][
             'additionalneeds'], "Booking additionalneeds isn't equal to expected"
+
+
+@allure.feature('Test create booking')
+@allure.story('Positive: creating booking with custom data')
+def test_create_booking_with_custom_data(api_client):
+    booking_data = {
+        "firstname": "Anton",
+        "lastname": "Andreevich",
+        "totalprice": 150,
+        "depositpaid": True,
+        "bookingdates": {
+            "checkin": "2025-10-11",
+            "checkout": "2025-10-20"
+        },
+        "additionalneeds": "Dinner"
+    }
+    response = api_client.create_booking(booking_data)
+    try:
+        BookingResponse(**response)
+    except ValidationError as e:
+        raise ValidationError(f'Response validation failed: {e}')
+
+    assert response['booking']['firstname'] == booking_data['firstname']
+    assert response['booking']['lastname'] == booking_data['lastname']
+    assert response['booking']['totalprice'] == booking_data['totalprice']
+    assert response['booking']['depositpaid'] == booking_data['depositpaid']
+    assert response['booking']['bookingdates']['checkin'] == booking_data['bookingdates']['checkin']
+    assert response['booking']['bookingdates']['checkout'] == booking_data['bookingdates']['checkout']
+    assert response['booking']['additionalneeds'] == booking_data['additionalneeds']
 
 
 @allure.feature('Test create booking')
